@@ -6,6 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ChatService } from '../../service/chat-service';
+import { TextareaModule } from 'primeng/textarea';
 
 interface Message {
   from: 'me' | 'bot';
@@ -16,7 +17,7 @@ interface Message {
 
 @Component({
   selector: 'app-chat',
-  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, TableModule],
+  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, TableModule,TextareaModule],
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
   animations: [

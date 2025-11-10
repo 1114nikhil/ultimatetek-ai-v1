@@ -8,14 +8,14 @@
         pButton
         icon="pi pi-bars"
         class="p-button-rounded p-button-text toggle-btn"
-        style="background-color: grey; color: white;"
+        style=" color: rgb(98, 108, 114);"
         (click)="toggleSidebar()"
       ></button>
     </div>
 
     <div class="new-chat" *ngIf="!collapsed">
-      <button pButton type="button" label="+ New chat" class="p-button-rounded p-button-outlined"></button>
-      <button pButton icon="pi pi-search" class="p-button-rounded p-button-text search-icon"></button>
+      <button pButton type="button" label="+ New chat" class="p-button-rounded p-button-outlined" style="border-color: #163d86; color:#163d86"></button>
+      <!-- <button pButton icon="pi pi-search" class="p-button-rounded p-button-text search-icon"></button> -->
     </div>
 
     <div class="conversations">
@@ -73,16 +73,18 @@
     <!-- Input -->
     <div class="chat-input">
       <div class="input-box">
-        <i class="pi pi-smile"></i>
-        <input
-          pInputText
-          placeholder="What's in your mind?..."
-          [ngModel]="newMessage()"
-          (ngModelChange)="newMessage.set($event)"
-          (keydown.enter)="send()"
-          [disabled]="isLoading()"
-        />
-      </div>
+  <i class="pi pi-smile"></i>
+  <textarea
+    pInputTextarea
+    rows="1"
+    autoResize="true"
+    placeholder="What's in your mind?..."
+    [ngModel]="newMessage()"
+    (ngModelChange)="newMessage.set($event)"
+    (keydown.enter)="send()"
+    [disabled]="isLoading()"
+  ></textarea>
+</div>
       <button
         pButton
         icon="pi pi-send"
