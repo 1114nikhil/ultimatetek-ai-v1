@@ -1,0 +1,95 @@
+
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="left-panel card" [@sidebarState]="collapsed ? 'collapsed' : 'expanded'">
+    <div class="brand">
+      <h2 *ngIf="!collapsed">Onyx A.I+</h2>
+      <button
+        pButton
+        icon="pi pi-bars"
+        class="p-button-rounded p-button-text toggle-btn"
+        style="background-color: grey; color: white;"
+        (click)="toggleSidebar()"
+      ></button>
+    </div>
+
+    <div class="new-chat" *ngIf="!collapsed">
+      <button pButton type="button" label="+ New chat" class="p-button-rounded p-button-outlined"></button>
+      <button pButton icon="pi pi-search" class="p-button-rounded p-button-text search-icon"></button>
+    </div>
+
+    <div class="conversations">
+      <h6 *ngIf="!collapsed">
+        Your conversations <span class="clear">Clear All</span>
+      </h6>
+    </div>
+  </aside>
+
+  <!-- Chat Area -->
+  <main class="chat-area card">
+    <div class="chat-header" style="background-color:#163d86;width:100%;">
+      <div class="chat-title">
+        <div><div class="name" style="color:white;">Onyx A.I +</div></div>
+      </div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-body chat-scroll">
+      <div *ngFor="let m of messageBoard()" class="message-row" [class.me]="m.from === 'me'">
+        <div class="bubble" [class.bot]="m.from === 'bot'">
+         <div class="text" *ngIf="m.text">
+  <span *ngIf="m.text === 'Loading'; else normalText" class="loading-dots">Loading</span>
+  <ng-template #normalText>{{ m.text }}</ng-template>
+</div>
+
+          <div *ngIf="m.tableData && m.tableData.length">
+            <p-table
+              [value]="m.tableData"
+              [paginator]="true"
+              [rows]="10"
+              [rowsPerPageOptions]="[10,25,50]"
+              [showCurrentPageReport]="true"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+              styleClass="p-datatable-sm p-datatable-gridlines"
+            >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th *ngFor="let col of m.tableData[0] | keyvalue">{{ col.key }}</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-row>
+                <tr>
+                  <td *ngFor="let col of row | keyvalue">{{ col.value || '-' }}</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+
+          <div class="time">{{ m.time }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input">
+      <div class="input-box">
+        <i class="pi pi-smile"></i>
+        <input
+          pInputText
+          placeholder="What's in your mind?..."
+          [ngModel]="newMessage()"
+          (ngModelChange)="newMessage.set($event)"
+          (keydown.enter)="send()"
+          [disabled]="isLoading()"
+        />
+      </div>
+      <button
+        pButton
+        icon="pi pi-send"
+        class="send-button p-button-rounded"
+        (click)="send()"
+        [disabled]="isLoading()"
+      ></button>
+    </div>
+  </main>
+</div>

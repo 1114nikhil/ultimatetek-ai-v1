@@ -1,0 +1,63 @@
+<div
+  class="login-container"
+  *ngIf="!success(); else successTemplate"
+  [dir]="translate.currentLang === 'ar' ? 'rtl' : 'ltr'"
+  [lang]="translate.currentLang"
+>
+  <div class="login-card">
+    <!-- 🏢 Header -->
+    <div class="login-header">
+      <div class="company-logo">
+        <img class="logo-icon" src="assets/images/logo.png" alt="Logo" />
+      </div>
+      <h2>{{ 'LOGIN.WELCOME' | translate }}</h2>
+    </div>
+
+    <!-- 🧾 Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Username + Button in same row -->
+      <div class="form-inline">
+        <span class="p-float-label input-wrapper">
+
+        <p-floatLabel variant="on">
+          <input
+            id="username"
+            type="text"
+            pInputText
+            formControlName="username"
+            class="w-full"
+            placeholder="Enter username"
+          />
+          <label for="username">{{ 'LOGIN.EMAIL' | translate }}</label>
+          </p-floatLabel>
+        </span>
+
+        <button
+          type="submit"
+          pButton
+          [label]="'LOGIN.SIGN_IN' | translate"
+          class="login-inline-btn"
+          [loading]="loading()"
+        ></button>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer-links mt-4">
+        <a href="#">{{ 'LOGIN.PRIVACY' | translate }}</a> •
+        <a href="#">{{ 'LOGIN.TERMS' | translate }}</a> •
+        <a href="#">{{ 'LOGIN.SUPPORT' | translate }}</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ✅ Success State -->
+<ng-template #successTemplate>
+  <div class="success-message" [dir]="translate.currentLang === 'ar' ? 'rtl' : 'ltr'">
+    <div class="success-icon">
+      <i class="pi pi-check"></i>
+    </div>
+    <h3>{{ 'LOGIN.SUCCESS_TITLE' | translate }}</h3>
+    <p>{{ 'LOGIN.SUCCESS_TEXT' | translate }}</p>
+  </div>
+</ng-template>

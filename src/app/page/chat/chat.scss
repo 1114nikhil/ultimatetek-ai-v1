@@ -1,0 +1,258 @@
+:root {
+  --brand: #163d86;
+  --white: #ffffff;
+  --grey: #d9d9d9;
+}
+
+/* container */
+:host {
+  display: block;
+  height: 100vh;
+  background: linear-gradient(180deg, var(--white) 0%, #f4f6fb 100%);
+}
+
+.app-shell {
+  display: flex;
+  gap: 24px;
+  height: 100%;
+  padding: 24px;
+  align-items: stretch;
+  transition: all 0.4s ease;
+}
+
+/* SIDEBAR */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(22, 61, 134, 0.1);
+  padding: 16px;
+  overflow: hidden;
+  transition: width 0.4s ease;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.brand h2 {
+  color: var(--brand);
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.toggle-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  color: var(--brand);
+}
+
+.new-chat {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.conversations {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.conversations h6 {
+  color: var(--brand);
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.conv-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 12px;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.conv-item:hover {
+  background: #f0f3ff;
+}
+
+.conv-item.active {
+  background: #e8ecff;
+}
+
+.conv-left i {
+  font-size: 18px;
+  color: var(--brand);
+}
+
+.conv-mid .title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--brand);
+}
+
+.conv-mid .last {
+  font-size: 12px;
+  color: var(--grey);
+}
+
+/* CHAT AREA */
+.chat-area {
+  flex: 1;
+  border-radius: 16px;
+  padding: 24px;
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(22, 61, 134, 0.1);
+}
+
+.chat-header {
+  font-weight: 700;
+  color: var(--brand);
+  margin-bottom: 12px;
+}
+
+.chat-body {
+  height: 100%;
+  color: var(--brand);
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .app-shell {
+    padding: 16px;
+    gap: 12px;
+    flex-direction: column;
+  }
+  .left-panel {
+    width: 100% !important;
+    order: 2;
+  }
+  .chat-area {
+    order: 1;
+    width: 100%;
+  }
+}
+p-table {
+  width: 100%;
+  margin-top: 8px;
+}
+
+:host ::ng-deep .p-datatable {
+  background: #ffffff;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .p-datatable thead th {
+  background: #163d86;
+  color: #ffffff;
+  padding: 8px;
+}
+
+:host ::ng-deep .p-datatable tbody td {
+  padding: 6px;
+  color: #163d86;
+}
+:host ::ng-deep .p-datatable {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  color: #163d86;
+}
+
+:host ::ng-deep .p-datatable thead th {
+  background-color: #163d86 !important;
+  color: white !important;
+}
+
+:host ::ng-deep .p-datatable tbody td {
+  background-color: #ffffff;
+  color: #163d86;
+  border-color: #eaeaea;
+}
+
+/* 🌤️ LIGHT THEME FIXES */
+
+/* Scrollbar Styling (WebKit-based browsers) */
+:host ::ng-deep ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+:host ::ng-deep ::-webkit-scrollbar-track {
+  background: #f1f1f1; /* light grey */
+  border-radius: 10px;
+}
+
+:host ::ng-deep ::-webkit-scrollbar-thumb {
+  background-color: #b3c1e0; /* soft blue-grey */
+  border-radius: 10px;
+}
+
+:host ::ng-deep ::-webkit-scrollbar-thumb:hover {
+  background-color: #163d86; /* brand blue on hover */
+}
+
+/* Firefox scrollbar (modern support) */
+:host {
+  scrollbar-width: thin;
+  scrollbar-color: #b3c1e0 #f1f1f1;
+}
+
+/* PrimeNG paginator + footer fix */
+:host ::ng-deep .p-paginator {
+  background: #ffffff !important;
+  color: #163d86 !important;
+  border-top: 1px solid #e0e0e0 !important;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page {
+  color: #163d86 !important;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-page.p-highlight .p-paginator-link .p-component .p-inputwrapper .p-paginator-rpp-dropdown .p-select .ng-pristine .ng-valid .ng-star-inserted .p-inputwrapper-filled .ng-touched{
+  background-color: #163d86 !important;
+  color: #ffffff !important;
+}
+
+:host ::ng-deep .p-paginator .p-paginator-icon {
+  color: #163d86 !important;
+}
+
+/* 🌀 Animated "Loading..." bubble */
+.loading-dots {
+  display: inline-block;
+  font-weight: 300;
+  color: #163d86;
+  letter-spacing: 2px;
+}
+
+.loading-dots::after {
+  content: '...';
+  animation: dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: '';
+  }
+  33% {
+    content: '.';
+  }
+  66% {
+    content: '..';
+  }
+  100% {
+    content: '...';
+  }
+}
