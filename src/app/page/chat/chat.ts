@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -7,6 +7,8 @@ import { TableModule } from 'primeng/table';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ChatService } from '../../service/chat-service';
 import { TextareaModule } from 'primeng/textarea';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { DrawerModule } from 'primeng/drawer';
 
 interface Message {
   from: 'me' | 'bot';
@@ -17,7 +19,7 @@ interface Message {
 
 @Component({
   selector: 'app-chat',
-  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, TableModule,TextareaModule],
+  imports: [CommonModule, DrawerModule,FormsModule, ButtonModule, InputTextModule, TableModule,TextareaModule,RadioButtonModule ],
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
   animations: [
@@ -31,100 +33,124 @@ interface Message {
 export class Chat {
  constructor(private chatService: ChatService) {}
 
+  drawerOpen = false;
   collapsed = false;
   newMessage = signal('');
   isLoading = signal(false);
 
+    apis = [
+    { key: 'dbquery1', name: 'DB Query 1', url: 'https://ai.ultimatetek.in:8077/dbquery/generate/insights' },
+    { key: 'dbquery2', name: 'DB Query 2', url: 'https://api.example.com/dbquery2' },
+  ];
+
+  selectedApi = this.apis[0]; // default selection
+
   /** 🎯 Signal that holds all chat messages */
   messageBoard = signal<Message[]>([
   ]);
-
+  /** 💡 Effect to clear chat when API changes */
+  ngOnInit() {
+    // Watch for selection change (manual way since we use ngModel)
+    const radioButtons = document.querySelectorAll('input[name="category"]');
+    radioButtons.forEach(btn => {
+      btn.addEventListener('change', () => {
+        this.clearChat();
+      });
+    });
+  }
+ closeDrawer() {
+    this.drawerOpen = false;
+  }
+  /** 🧹 Clears chat messages */
+  clearChat() {
+    this.messageBoard.set([]);
+    this.newMessage.set('');
+  }
+  
   toggleSidebar() {
-    this.collapsed = !this.collapsed;
+     if (this.isMobile()) {
+      this.drawerOpen = !this.drawerOpen;
+    } else {
+      this.collapsed = !this.collapsed;
+    }
+  }
+ isMobile(): boolean {
+    return window.innerWidth <= 900;
   }
 
+  // Auto-close drawer when user resizes to desktop
+  @HostListener('window:resize')
+  onResize() {
+    if (!this.isMobile()) {
+      this.drawerOpen = false;
+    }
+  }
   /** 🧠 Sends a query and updates messages reactively */
- send() {
-  const msg = this.newMessage().trim();
-  if (!msg) return;
+send() {
+    const msg = this.newMessage().trim();
+    if (!msg || !this.selectedApi) return;
 
-  // 🧍‍♂️ User message
-  this.messageBoard.update(list => [
-    ...list,
-    { from: 'me', text: msg, time: this.timeNow() },
-  ]);
+    this.messageBoard.update(list => [
+      ...list,
+      { from: 'me', text: msg, time: this.timeNow() },
+    ]);
 
-  this.newMessage.set('');
-  this.scrollToBottom();
+    this.newMessage.set('');
+    this.scrollToBottom();
 
-  const payload = { query: msg };
-  this.isLoading.set(true);
+    const payload = { query: msg };
+    this.isLoading.set(true);
 
-  // 🧠 Add temporary loading message to messageBoard
-  const loadingMessage: Message = {
-    from: 'bot',
-    text: 'Loading',
-    time: this.timeNow(),
-  };
-  this.messageBoard.update(list => [...list, loadingMessage]);
-  this.scrollToBottom();
+    // Temporary loading message
+    const loadingMessage: Message = { from: 'bot', text: 'Loading', time: this.timeNow() };
+    this.messageBoard.update(list => [...list, loadingMessage]);
+    this.scrollToBottom();
 
-  // 🚀 Make API call
-  this.chatService.getData(payload).subscribe({
-    next: (res: any) => {
-      this.isLoading.set(false);
+    // 🧠 Use selected API’s URL
+    this.chatService.getData(payload, this.selectedApi.url).subscribe({
+      next: (res: any) => {
+        this.isLoading.set(false);
+        this.messageBoard.update(list => list.filter(m => m.text !== 'Loading'));
 
-      // Remove the "Loading" bubble
-      this.messageBoard.update(list => list.filter(m => m.text !== 'Loading'));
+        let response;
+        try {
+          response = typeof res === 'string' ? JSON.parse(res) : res;
+        } catch {
+          response = { status: false, message: 'Invalid JSON format.' };
+        }
 
-      // Parse response
-      let response: any;
-      try {
-        response = typeof res === 'string' ? JSON.parse(res) : res;
-      } catch {
-        response = { status: false, message: 'Invalid JSON format.' };
-      }
+        if (response?.status === true && Array.isArray(response.result)) {
+          this.messageBoard.update(list => [
+            ...list,
+            { from: 'bot', tableData: response.result, time: this.timeNow() },
+          ]);
+        } else if (response?.status === true) {
+          this.messageBoard.update(list => [
+            ...list,
+            { from: 'bot', text: response.result?.toString() || 'No result found.', time: this.timeNow() },
+          ]);
+        } else {
+          this.messageBoard.update(list => [
+            ...list,
+            { from: 'bot', text: response?.message || 'Something went wrong.', time: this.timeNow() },
+          ]);
+        }
 
-      // ✅ Success with table data
-      if (response?.status === true && Array.isArray(response.result)) {
+        this.scrollToBottom();
+      },
+      error: err => {
+        console.error('Chat API error:', err);
+        this.isLoading.set(false);
+        this.messageBoard.update(list => list.filter(m => m.text !== 'Loading'));
         this.messageBoard.update(list => [
           ...list,
-          { from: 'bot', tableData: response.result, time: this.timeNow() },
+          { from: 'bot', text: '⚠️ Server error. Please try again later.', time: this.timeNow() },
         ]);
-      }
-      // ✅ Success with text data
-      else if (response?.status === true) {
-        this.messageBoard.update(list => [
-          ...list,
-          { from: 'bot', text: response.result?.toString() || 'No result found.', time: this.timeNow() },
-        ]);
-      }
-      // ❌ Error
-      else {
-        this.messageBoard.update(list => [
-          ...list,
-          { from: 'bot', text: response?.message || 'Something went wrong.', time: this.timeNow() },
-        ]);
-      }
+        this.scrollToBottom();
+      },
+    });
+  }
 
-      this.scrollToBottom();
-    },
-    error: err => {
-      console.error('Chat API error:', err);
-      this.isLoading.set(false);
-
-      // Remove "Loading" bubble
-      this.messageBoard.update(list => list.filter(m => m.text !== 'Loading'));
-
-      this.messageBoard.update(list => [
-        ...list,
-        { from: 'bot', text: '⚠️ Server error. Please try again later.', time: this.timeNow() },
-      ]);
-
-      this.scrollToBottom();
-    },
-  });
-}
 
   timeNow() {
     const d = new Date();

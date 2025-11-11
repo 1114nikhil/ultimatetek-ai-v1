@@ -1,57 +1,101 @@
-
 <div class="app-shell">
-  <!-- Sidebar -->
-  <aside class="left-panel card" [@sidebarState]="collapsed ? 'collapsed' : 'expanded'">
+  <!-- Desktop left-panel (regular) — visible for >= 901px -->
+  <aside class="left-panel card desktop-panel" *ngIf="!isMobile()">
     <div class="brand">
       <h2 *ngIf="!collapsed">Onyx A.I+</h2>
-      <button
-        pButton
-        icon="pi pi-bars"
-        class="p-button-rounded p-button-text toggle-btn"
-        style=" color: rgb(98, 108, 114);"
-        (click)="toggleSidebar()"
-      ></button>
+      <button pButton icon="pi pi-bars"
+              class="p-button-rounded p-button-text toggle-btn"
+              (click)="toggleSidebar()"></button>
     </div>
 
+    <!-- Put the same sidebar content you had -->
     <div class="new-chat" *ngIf="!collapsed">
-      <button pButton type="button" label="+ New chat" class="p-button-rounded p-button-outlined" style="border-color: #163d86; color:#163d86"></button>
-      <!-- <button pButton icon="pi pi-search" class="p-button-rounded p-button-text search-icon"></button> -->
+      <div class="flex flex-col gap-4">
+        <div class="radio-inputs">
+          <div *ngFor="let api of apis" class="radio-tile-wrapper">
+            <p-radiobutton
+              [inputId]="api.key"
+              name="category"
+              [value]="api"
+              [(ngModel)]="selectedApi"
+              (ngModelChange)="clearChat()"></p-radiobutton>
+
+            <label class="radio-tile" [for]="api.key">
+              <div class="radio-icon"><i class="pi pi-database"></i></div>
+              <span class="radio-label">{{ api.name }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="conversations">
-      <h6 *ngIf="!collapsed">
-        Your conversations <span class="clear">Clear All</span>
-      </h6>
+      <h6 *ngIf="!collapsed">Your conversations <span class="clear">Clear All</span></h6>
     </div>
   </aside>
+
+  <!-- PrimeNG Sidebar used as Drawer on mobile -->
+  <p-drawer [(visible)]="drawerOpen" position="left" [baseZIndex]="10000"
+             [modal]="true" [showCloseIcon]="false"
+             styleClass="mobile-drawer">
+    <div class="brand">
+      <h2>Onyx A.I+</h2>
+      <button pButton icon="pi pi-times" class="p-button-rounded p-button-text"
+              (click)="closeDrawer()"></button>
+    </div>
+
+    <!-- copy same sidebar content here for mobile drawer -->
+    <div class="new-chat">
+      <div class="flex flex-col gap-4">
+        <div class="radio-inputs">
+          <div *ngFor="let api of apis" class="radio-tile-wrapper">
+            <p-radiobutton
+              [inputId]="'m-' + api.key"
+              name="m-category"
+              [value]="api"
+              [(ngModel)]="selectedApi"
+              (ngModelChange)="clearChat(); closeDrawer()"></p-radiobutton>
+
+            <label class="radio-tile" [for]="'m-' + api.key">
+              <div class="radio-icon"><i class="pi pi-database"></i></div>
+              <span class="radio-label">{{ api.name }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="conversations">
+      <h6>Your conversations <span class="clear">Clear All</span></h6>
+    </div>
+  </p-drawer>
 
   <!-- Chat Area -->
   <main class="chat-area card">
     <div class="chat-header" style="background-color:#163d86;width:100%;">
       <div class="chat-title">
-        <div><div class="name" style="color:white;">Onyx A.I +</div></div>
+        <!-- mobile menu button -->
+        <button class="mobile-menu-btn" (click)="toggleSidebar()" *ngIf="isMobile()">
+          <i class="pi pi-bars"></i>
+        </button>
+
+        <div><div class="name" style="color:white;">{{ selectedApi.name }}</div></div>
       </div>
     </div>
 
-    <!-- Chat Messages -->
+    <!-- Chat body (unchanged) -->
     <div class="chat-body chat-scroll">
       <div *ngFor="let m of messageBoard()" class="message-row" [class.me]="m.from === 'me'">
         <div class="bubble" [class.bot]="m.from === 'bot'">
-         <div class="text" *ngIf="m.text">
-  <span *ngIf="m.text === 'Loading'; else normalText" class="loading-dots">Loading</span>
-  <ng-template #normalText>{{ m.text }}</ng-template>
-</div>
+          <div class="text" *ngIf="m.text">
+            <span *ngIf="m.text === 'Loading'; else normalText" class="loading-dots">Loading</span>
+            <ng-template #normalText>{{ m.text }}</ng-template>
+          </div>
 
           <div *ngIf="m.tableData && m.tableData.length">
-            <p-table
-              [value]="m.tableData"
-              [paginator]="true"
-              [rows]="10"
-              [rowsPerPageOptions]="[10,25,50]"
-              [showCurrentPageReport]="true"
-              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-              styleClass="p-datatable-sm p-datatable-gridlines"
-            >
+            <p-table [value]="m.tableData" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
+                     [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                     styleClass="p-datatable-sm p-datatable-gridlines">
               <ng-template pTemplate="header">
                 <tr>
                   <th *ngFor="let col of m.tableData[0] | keyvalue">{{ col.key }}</th>
@@ -70,28 +114,14 @@
       </div>
     </div>
 
-    <!-- Input -->
     <div class="chat-input">
       <div class="input-box">
-  <i class="pi pi-smile"></i>
-  <textarea
-    pInputTextarea
-    rows="1"
-    autoResize="true"
-    placeholder="What's in your mind?..."
-    [ngModel]="newMessage()"
-    (ngModelChange)="newMessage.set($event)"
-    (keydown.enter)="send()"
-    [disabled]="isLoading()"
-  ></textarea>
-</div>
-      <button
-        pButton
-        icon="pi pi-send"
-        class="send-button p-button-rounded"
-        (click)="send()"
-        [disabled]="isLoading()"
-      ></button>
+        <i class="pi pi-smile"></i>
+        <textarea pInputTextarea rows="1" autoResize="true" placeholder="What's in your mind?..."
+                  [ngModel]="newMessage()" (ngModelChange)="newMessage.set($event)"
+                  (keydown.enter)="send()" [disabled]="isLoading()"></textarea>
+      </div>
+      <button pButton icon="pi pi-send" class="send-button p-button-rounded" (click)="send()" [disabled]="isLoading()"></button>
     </div>
   </main>
 </div>

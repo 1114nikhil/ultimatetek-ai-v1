@@ -6,11 +6,10 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ChatService {
-  private url = 'https://ai.ultimatetek.in:8077/dbquery/generate/insights';
 
   constructor(private http: HttpClient) {}
 
- getData(payload: any) {
-  return this.http.post(this.url, payload, { responseType: 'text' });
-}
+ getData(payload: any, apiUrl: string): Observable<any> {
+    return this.http.post(apiUrl, payload);
+  }
 }
