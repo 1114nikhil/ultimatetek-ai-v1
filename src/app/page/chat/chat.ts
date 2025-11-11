@@ -33,8 +33,7 @@ interface Message {
 export class Chat {
  constructor(private chatService: ChatService) {}
 
-  drawerOpen = false;
-  collapsed = false;
+  drawerOpen = true; 
   newMessage = signal('');
   isLoading = signal(false);
 
@@ -58,7 +57,11 @@ export class Chat {
       });
     });
   }
- closeDrawer() {
+ toggleSidebar() {
+    this.drawerOpen = !this.drawerOpen;
+  }
+
+  closeDrawer() {
     this.drawerOpen = false;
   }
   /** 🧹 Clears chat messages */
@@ -66,25 +69,8 @@ export class Chat {
     this.messageBoard.set([]);
     this.newMessage.set('');
   }
-  
-  toggleSidebar() {
-     if (this.isMobile()) {
-      this.drawerOpen = !this.drawerOpen;
-    } else {
-      this.collapsed = !this.collapsed;
-    }
-  }
- isMobile(): boolean {
-    return window.innerWidth <= 900;
-  }
-
-  // Auto-close drawer when user resizes to desktop
-  @HostListener('window:resize')
-  onResize() {
-    if (!this.isMobile()) {
-      this.drawerOpen = false;
-    }
-  }
+ 
+ 
   /** 🧠 Sends a query and updates messages reactively */
 send() {
     const msg = this.newMessage().trim();
